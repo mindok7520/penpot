@@ -3,4 +3,11 @@
 corepack enable;
 corepack install;
 pnpm install;
-pnpx playwright install chromium;
+
+if [ "${PENPOT_SKIP_PLAYWRIGHT_INSTALL:-false}" = "true" ]; then
+    echo "[setup] Skipping Playwright Chromium install"
+elif [ -f /.dockerenv ] && [ "${PENPOT_FORCE_PLAYWRIGHT_INSTALL:-false}" != "true" ]; then
+    echo "[setup] Skipping Playwright Chromium install inside Docker"
+else
+    pnpx playwright install chromium;
+fi

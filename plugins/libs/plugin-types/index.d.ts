@@ -2980,6 +2980,18 @@ export interface LocalStorage {
 /**
  * It takes the user from one board to the destination set in the interaction.
  */
+export interface ViewportWidthBranch {
+  /**
+   * Minimum preview viewport width that activates this destination.
+   */
+  readonly minWidth: number;
+
+  /**
+   * Board to navigate to when the preview viewport width is at least `minWidth`.
+   */
+  readonly destination: Board;
+}
+
 export interface NavigateTo {
   /**
    * Type of action
@@ -2990,6 +3002,13 @@ export interface NavigateTo {
    * Board to which the action targets
    */
   readonly destination: Board;
+
+  /**
+   * Optional width-based destinations. The largest `minWidth` that is less
+   * than or equal to the preview viewport width wins. If none match, the
+   * default `destination` is used.
+   */
+  readonly widthBranches?: ViewportWidthBranch[];
 
   /**
    * When true the scroll will be preserved.

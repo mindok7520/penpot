@@ -143,19 +143,26 @@
                (nil? flow))
       (add-flow (:id frame)))))
 
+(defn- interaction-destinations
+  [interaction]
+  (cond-> (into [] (keep :destination) (:conditional-destinations interaction))
+    (:destination interaction)
+    (conj (:destination interaction))))
+
 (defn add-interaction
   [page-id shape-id interaction]
   (ptk/reify ::add-interaction
     ptk/WatchEvent
     (watch [_ state _]
-      (let [page-id  (or page-id (:current-page-id state))]
+      (let [page-id      (or page-id (:current-page-id state))
+            destinations (interaction-destinations interaction)]
         (rx/of (dwsh/update-shapes [shape-id]
                                    (fn [shape]
                                      (cls/add-new-interaction shape interaction))
                                    {:page-id page-id})
 
-               (when (:destination interaction)
-                 (dwsh/update-shapes [(:destination interaction)]
+               (when (seq destinations)
+                 (dwsh/update-shapes destinations
                                      cls/show-in-viewer
                                      {:page-id page-id}))
                (when (ctsi/flow-origin? [interaction])
@@ -210,7 +217,8 @@
      ptk/WatchEvent
      (watch [_ _ _]
        (let [interactions (ctsi/update-interaction (:interactions shape) index update-fn)
-             interaction (nth interactions index)]
+             interaction (nth interactions index)
+             destinations (interaction-destinations interaction)]
          (rx/of
           (dwsh/update-shapes
            [(:id shape)]
@@ -219,8 +227,8 @@
                  (update :interactions ctsi/update-interaction index update-fn)))
            options)
 
-          (when (some? (:destination interaction))
-            (dwsh/update-shapes [(:destination interaction)] cls/show-in-viewer options))))))))
+          (when (seq destinations)
+            (dwsh/update-shapes destinations cls/show-in-viewer options))))))))
 
 (defn remove-all-interactions-nav-to
   "Remove all interactions that navigate to the given frame."

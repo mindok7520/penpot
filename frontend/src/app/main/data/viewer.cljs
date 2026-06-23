@@ -44,6 +44,7 @@
    :selected #{}
    :collapsed #{}
    :hover nil
+   :preview-size nil
    :share-id ""
    :file-comments-users []})
 
@@ -464,6 +465,42 @@
     ptk/UpdateEvent
     (update [_ state]
       (assoc-in state [:viewer-local :viewport-size] size))))
+
+(defn- valid-preview-size?
+  [size]
+  (and (some? size)
+       (sm/valid-safe-number? (:width size))
+       (sm/valid-safe-number? (:height size))
+       (pos? (:width size))
+       (pos? (:height size))))
+
+(defn apply-preview-size
+  [size]
+  (ptk/reify ::apply-preview-size
+    ptk/UpdateEvent
+    (update [_ state]
+      (if (valid-preview-size? size)
+        (assoc-in state [:viewer-local :preview-size] size)
+        (d/dissoc-in state [:viewer-local :preview-size])))))
+
+(defn set-preview-size
+  [size]
+  (ptk/reify ::set-preview-size
+    ptk/UpdateEvent
+    (update [_ state]
+      (if (valid-preview-size? size)
+        (assoc-in state [:viewer-local :preview-size] size)
+        (d/dissoc-in state [:viewer-local :preview-size])))
+
+    ptk/WatchEvent
+    (watch [_ state _]
+      (let [params (rt/get-params state)
+            params (if (valid-preview-size? size)
+                     (assoc params
+                            :preview-width (:width size)
+                            :preview-height (:height size))
+                     (dissoc params :preview-width :preview-height))]
+        (rx/of (rt/nav :viewer params))))))
 
 ;; --- Local State Management
 

@@ -1,1 +1,22 @@
+* text=auto
+
+*.sh text eol=lf
+*.bash text eol=lf
+*.clj text eol=lf
+*.cljs text eol=lf
+*.cljc text eol=lf
+*.edn text eol=lf
+*.env text eol=lf
+*.py text eol=lf
+*.mjs text eol=lf
+
+manage.sh text eol=lf
+**/scripts/* text eol=lf
+docker/devenv/files/* text eol=lf
+render-wasm/_build_env text eol=lf
+render-wasm/build text eol=lf
+render-wasm/lint text eol=lf
+render-wasm/test text eol=lf
+render-wasm/watch* text eol=lf
+
 frontend/vendor/* linguist-vendored

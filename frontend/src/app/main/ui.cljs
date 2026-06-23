@@ -296,6 +296,12 @@
              imode    (or (some-> (:interactions-mode params) keyword)
                           :show-on-click)
              frame-id (some-> (:frame-id params) uuid/parse*)
+             preview-width  (some-> (rt/get-query-param params :preview-width) parse-long)
+             preview-height (some-> (rt/get-query-param params :preview-height) parse-long)
+             preview-size   (when (and (pos? (or preview-width 0))
+                                        (pos? (or preview-height 0)))
+                              {:width preview-width
+                               :height preview-height})
              share    (:share params)]
 
          [:? {}
@@ -307,6 +313,7 @@
             :index index
             :share-id share-id
             :interactions-mode imode
+            :preview-size preview-size
             :share share}]])
 
 

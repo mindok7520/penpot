@@ -110,11 +110,20 @@
 (def check-animation!
   (sm/check-fn schema:animation))
 
+(def schema:conditional-destination
+  [:map {:title "ConditionalDestination"}
+   [:min-width ::sm/safe-number]
+   [:destination [:maybe ::sm/uuid]]])
+
+(def schema:conditional-destinations
+  [:vector {:gen/max 2} schema:conditional-destination])
+
 (def schema:generic-interaction-attrs
   [:map {:title "GenericInteractionAttrs"}
    [:action-type {:optional true} [::sm/one-of action-types]]
    [:event-type {:optional true} [::sm/one-of event-types]]
    [:destination {:optional true} [:maybe ::sm/uuid]]
+   [:conditional-destinations {:optional true} schema:conditional-destinations]
    [:preserve-scroll {:optional true} :boolean]
    [:animation {:optional true} schema:animation]
    [:overlay-position {:optional true} ::gpt/point]
@@ -129,6 +138,7 @@
    [:action-type [:= :navigate]]
    [:event-type [::sm/one-of event-types]]
    [:destination {:optional true} [:maybe ::sm/uuid]]
+   [:conditional-destinations {:optional true} schema:conditional-destinations]
    [:preserve-scroll {:optional true} :boolean]
    [:animation {:optional true} schema:animation]])
 
@@ -326,6 +336,74 @@
 (defn has-preserve-scroll
   [interaction]
   (= (:action-type interaction) :navigate))
+
+(defn has-conditional-destinations
+  [interaction]
+  (= (:action-type interaction) :navigate))
+
+(defn add-conditional-destination
+  [interaction]
+  (assert (check-interaction interaction))
+  (assert (has-conditional-destinations interaction)
+          "expected compatible interaction map with conditional destinations")
+
+  (update interaction :conditional-destinations
+          (fn [conditions]
+            (conj (vec conditions)
+                  {:min-width 0
+                   :destination (:destination interaction)}))))
+
+(defn remove-conditional-destination
+  [interaction index]
+  (assert (check-interaction interaction))
+  (assert (has-conditional-destinations interaction)
+          "expected compatible interaction map with conditional destinations")
+
+  (let [conditions (vec (:conditional-destinations interaction))
+        conditions (into (subvec conditions 0 index)
+                         (subvec conditions (inc index)))]
+    (if (seq conditions)
+      (assoc interaction :conditional-destinations conditions)
+      (dissoc interaction :conditional-destinations))))
+
+(defn update-conditional-destination
+  [interaction index update-fn & args]
+  (assert (check-interaction interaction))
+  (assert (has-conditional-destinations interaction)
+          "expected compatible interaction map with conditional destinations")
+
+  (let [conditions (vec (:conditional-destinations interaction))
+        conditions (apply update conditions index update-fn args)]
+    (if (seq conditions)
+      (assoc interaction :conditional-destinations conditions)
+      (dissoc interaction :conditional-destinations))))
+
+(defn set-conditional-min-width
+  [interaction index min-width]
+  (assert (sm/valid-safe-number? min-width)
+          "expected safe number for `min-width`")
+  (update-conditional-destination interaction index assoc :min-width min-width))
+
+(defn set-conditional-destination
+  [interaction index destination]
+  (update-conditional-destination interaction index assoc :destination destination))
+
+(defn resolve-destination
+  "Return the destination for a navigation interaction for the given preview
+  width. Conditional destinations use a min-width breakpoint; the largest
+  matching breakpoint wins, with :destination as the default fallback."
+  [interaction preview-width]
+  (let [preview-width (if (sm/valid-safe-number? preview-width) preview-width 0)
+        xform         (comp
+                       (filter #(some? (:destination %)))
+                       (filter #(sm/valid-safe-number? (:min-width %)))
+                       (filter #(<= (:min-width %) preview-width)))]
+    (or (some->> (:conditional-destinations interaction)
+                 (sequence xform)
+                 (sort-by :min-width)
+                 (last)
+                 (:destination))
+        (:destination interaction))))
 
 (defn set-preserve-scroll
   [interaction preserve-scroll]
@@ -694,13 +772,17 @@
   "Check if the interaction has the given frame as destination."
   [interaction frame-id]
   (and (has-destination interaction)
-       (= (:destination interaction) frame-id)))
+       (or (= (:destination interaction) frame-id)
+           (some #(= (:destination %) frame-id)
+                 (:conditional-destinations interaction)))))
 
 (defn navs-to?
   "Check if the interaction is a navigation to the given frame."
   [interaction frame-id]
   (and (= (:action-type interaction) :navigate)
-       (= (:destination interaction) frame-id)))
+       (or (= (:destination interaction) frame-id)
+           (some #(= (:destination %) frame-id)
+                 (:conditional-destinations interaction)))))
 
 ;; -- Helpers for interactions
 
@@ -724,14 +806,35 @@
   in the map nor in the objects tree."
   [interactions ids-map objects]
   (when (some? interactions)
-    (let [xform (comp (filter (fn [interaction]
-                                (let [destination (:destination interaction)]
-                                  (or (nil? destination)
-                                      (contains? ids-map destination)
-                                      (contains? objects destination)))))
-                      (map (fn [interaction]
-                             (d/update-when interaction :destination #(get ids-map % %)))))]
-      (into [] xform interactions))))
+    (letfn [(valid-destination? [destination]
+              (or (nil? destination)
+                  (contains? ids-map destination)
+                  (contains? objects destination)))
+            (remap-destination [destination]
+              (get ids-map destination destination))
+            (remap-conditional-destinations [conditions]
+              (->> conditions
+                   (filter #(valid-destination? (:destination %)))
+                   (mapv #(d/update-when % :destination remap-destination))
+                   (not-empty)))]
+      (let [xform (keep (fn [interaction]
+                          (let [destination        (:destination interaction)
+                                valid-destination? (valid-destination? destination)
+                                conditions         (remap-conditional-destinations
+                                                    (:conditional-destinations interaction))]
+                            (when (or valid-destination? (seq conditions))
+                              (cond-> interaction
+                                (contains? interaction :destination)
+                                (assoc :destination
+                                       (when valid-destination?
+                                         (remap-destination destination)))
+
+                                (some? conditions)
+                                (assoc :conditional-destinations conditions)
+
+                                (nil? conditions)
+                                (dissoc :conditional-destinations))))))]
+        (into [] xform interactions)))))
 
 (defn remove-interactions
   "Remove all interactions that the fn returns true."
@@ -748,12 +851,16 @@
   "Check if there is any interaction that is the start or the continuation of a flow"
   [interactions]
   (some #(and (#{:navigate :open-overlay :toggle-overlay :close-overlay} (:action-type %))
-              (some? (:destination %)))
+              (or (some? (:destination %))
+                  (some :destination (:conditional-destinations %))))
         interactions))
 
 (defn flow-to?
   "Check if there is any interaction that flows into the given frame"
   [interactions frame-id]
   (some #(and (#{:navigate :open-overlay :toggle-overlay :close-overlay} (:action-type %))
-              (= (:destination %) frame-id))
+              (or (= (:destination %) frame-id)
+                  (some (fn [condition]
+                          (= (:destination condition) frame-id))
+                        (:conditional-destinations %))))
         interactions))

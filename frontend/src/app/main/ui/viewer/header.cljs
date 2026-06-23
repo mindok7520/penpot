@@ -18,7 +18,7 @@
    [app.main.ui.formats :as fmt]
    [app.main.ui.icons :as deprecated-icon]
    [app.main.ui.viewer.comments :refer [comments-menu]]
-   [app.main.ui.viewer.interactions :refer [flows-menu* interactions-menu*]]
+   [app.main.ui.viewer.interactions :refer [flows-menu* interactions-menu* preview-size-menu*]]
    [app.util.dom :as dom]
    [app.util.i18n :refer [tr]]
    [okulary.core :as l]
@@ -120,7 +120,7 @@
                    :key (dm/str "zoom-fullscreen-" sc)} sc])]]]]]))
 
 (mf/defc header-options
-  [{:keys [section zoom page file index permissions interactions-mode share]}]
+  [{:keys [section zoom page file index permissions interactions-mode preview-size share]}]
   (let [fullscreen?    (mf/deref fullscreen-ref)
 
         toggle-fullscreen
@@ -174,7 +174,9 @@
                       (when index
                         [:> flows-menu* {:page page :index index}])
                       [:> interactions-menu*
-                       {:interactions-mode interactions-mode}]]
+                       {:interactions-mode interactions-mode}]
+                      [:> preview-size-menu*
+                       {:preview-size preview-size}]]
        :comments [:& comments-menu]
        [:div {:class (stl/css :view-options)}])
 
@@ -266,7 +268,7 @@
 
 
 (mf/defc header
-  [{:keys [project file page frame zoom section permissions index interactions-mode shown-thumbnails share]}]
+  [{:keys [project file page frame zoom section permissions index interactions-mode preview-size shown-thumbnails share]}]
   (let [go-to-dashboard
         (mf/use-fn
          #(st/emit! (dv/go-to-dashboard)))
@@ -357,4 +359,5 @@
                          :index index
                          :zoom zoom
                          :interactions-mode interactions-mode
+                         :preview-size preview-size
                          :share share}]]))

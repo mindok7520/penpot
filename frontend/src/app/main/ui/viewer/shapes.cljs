@@ -57,7 +57,9 @@
   [interaction shape base-frame frame-offset objects overlays]
   (case (:action-type interaction)
     :navigate
-    (when-let [frame-id (:destination interaction)]
+    (when-let [frame-id (ctsi/resolve-destination
+                         interaction
+                         (get-in @st/state [:viewer-local :viewport-size :width]))]
       (let [viewer-section (dom/get-element "viewer-section")
             scroll (if (:preserve-scroll interaction)
                      (dom/get-scroll-pos viewer-section)

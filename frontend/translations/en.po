@@ -6286,6 +6286,30 @@ msgstr "Interactions"
 msgid "viewer.header.interactions-section"
 msgstr "Interactions (%s)"
 
+#: src/app/main/ui/viewer/interactions.cljs:364
+msgid "viewer.header.preview-height"
+msgstr "Height"
+
+#: src/app/main/ui/viewer/interactions.cljs:356
+msgid "viewer.header.preview-size"
+msgstr "Preview size"
+
+#: src/app/main/ui/viewer/interactions.cljs:375
+msgid "viewer.header.preview-size-apply"
+msgstr "Apply"
+
+#: src/app/main/ui/viewer/interactions.cljs:349
+msgid "viewer.header.preview-size-auto"
+msgstr "Auto size"
+
+#: src/app/main/ui/viewer/interactions.cljs:372
+msgid "viewer.header.preview-size-clear"
+msgstr "Clear"
+
+#: src/app/main/ui/viewer/interactions.cljs:358
+msgid "viewer.header.preview-width"
+msgstr "Width"
+
 #: src/app/main/ui/viewer/share_link.cljs:188
 msgid "viewer.header.share.copy-link"
 msgstr "Copy link"
@@ -7680,6 +7704,10 @@ msgstr "Inspect"
 msgid "workspace.options.interaction-action"
 msgstr "Action"
 
+#: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:515, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:517
+msgid "workspace.options.interaction-add-width-condition"
+msgstr "Add width condition"
+
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:43, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:344
 msgid "workspace.options.interaction-after-delay"
 msgstr "After delay"
@@ -7772,6 +7800,10 @@ msgstr "Mouse enter"
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:42, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:342
 msgid "workspace.options.interaction-mouse-leave"
 msgstr "Mouse leave"
+
+#: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:491
+msgid "workspace.options.interaction-min-width"
+msgstr "Min width"
 
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:430, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:632
 msgid "workspace.options.interaction-ms"
@@ -7889,6 +7921,10 @@ msgstr "While Hovering"
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:40, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:340
 msgid "workspace.options.interaction-while-pressing"
 msgstr "While Pressing"
+
+#: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:511
+msgid "workspace.options.interaction-width-conditions"
+msgstr "Width conditions"
 
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:743
 msgid "workspace.options.interactions"

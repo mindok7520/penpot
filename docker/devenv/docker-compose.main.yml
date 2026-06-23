@@ -6,6 +6,18 @@ networks:
 volumes:
   user_data:
     name: ${PENPOT_USER_DATA_VOLUME}
+  frontend_node_modules:
+    name: ${PENPOT_TENANT}_frontend_node_modules
+  frontend_ui_node_modules:
+    name: ${PENPOT_TENANT}_frontend_ui_node_modules
+  frontend_shadow_cljs:
+    name: ${PENPOT_TENANT}_frontend_shadow_cljs
+  plugins_runtime_node_modules:
+    name: ${PENPOT_TENANT}_plugins_runtime_node_modules
+  exporter_node_modules:
+    name: ${PENPOT_TENANT}_exporter_node_modules
+  render_wasm_node_modules:
+    name: ${PENPOT_TENANT}_render_wasm_node_modules
 
 services:
   main:
@@ -19,6 +31,15 @@ services:
     volumes:
       - "user_data:/home/penpot/"
       - "${PENPOT_SOURCE_PATH}:/home/penpot/penpot:z"
+      - "./files/entrypoint.sh:/home/entrypoint.sh:ro"
+      - "./files/init.sh:/home/init.sh:ro"
+      - "./files/start-tmux.sh:/home/start-tmux.sh:ro"
+      - "frontend_node_modules:/home/penpot/penpot/frontend/node_modules"
+      - "frontend_ui_node_modules:/home/penpot/penpot/frontend/packages/ui/node_modules"
+      - "frontend_shadow_cljs:/home/penpot/penpot/frontend/.shadow-cljs"
+      - "plugins_runtime_node_modules:/home/penpot/penpot/plugins/libs/plugins-runtime/node_modules"
+      - "exporter_node_modules:/home/penpot/penpot/exporter/node_modules"
+      - "render_wasm_node_modules:/home/penpot/penpot/render-wasm/node_modules"
 
     ports:
       # Host ports are instance-specific; container ports stay fixed.

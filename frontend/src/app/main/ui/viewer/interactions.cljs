@@ -288,6 +288,92 @@
         (when (= interactions-mode :show-on-click)
           [:span {:class (stl/css :icon)}  deprecated-icon/tick])]]]]))
 
+(defn- parse-positive-size
+  [value]
+  (let [value (d/parse-integer value)]
+    (when (and (some? value) (pos? value))
+      value)))
+
+(mf/defc preview-size-menu*
+  [{:keys [preview-size]}]
+  (let [show-dropdown?  (mf/use-state false)
+        width*          (mf/use-state #(or (:width preview-size) ""))
+        height*         (mf/use-state #(or (:height preview-size) ""))
+        toggle-dropdown (mf/use-fn #(swap! show-dropdown? not))
+        hide-dropdown   (mf/use-fn #(reset! show-dropdown? false))
+
+        update-local-size
+        (mf/use-fn
+         (mf/deps preview-size)
+         (fn []
+           (reset! width* (or (:width preview-size) ""))
+           (reset! height* (or (:height preview-size) ""))))
+
+        change-width
+        (mf/use-fn
+         (fn [event]
+           (reset! width* (-> event dom/get-target dom/get-value))))
+
+        change-height
+        (mf/use-fn
+         (fn [event]
+           (reset! height* (-> event dom/get-target dom/get-value))))
+
+        apply-size
+        (mf/use-fn
+         (fn [event]
+           (dom/stop-propagation event)
+           (let [width  (parse-positive-size @width*)
+                 height (parse-positive-size @height*)]
+             (when (and width height)
+               (st/emit! (dv/set-preview-size {:width width :height height}))
+               (reset! show-dropdown? false)))))
+
+        clear-size
+        (mf/use-fn
+         (fn [event]
+           (dom/stop-propagation event)
+           (reset! width* "")
+           (reset! height* "")
+           (st/emit! (dv/set-preview-size nil))
+           (reset! show-dropdown? false)))]
+
+    (mf/with-effect [preview-size]
+      (update-local-size))
+
+    [:div {:on-click toggle-dropdown
+           :class (stl/css :view-options)}
+     [:span {:class (stl/css :dropdown-title)}
+      (if preview-size
+        (dm/str (:width preview-size) " x " (:height preview-size))
+        (tr "viewer.header.preview-size-auto"))]
+     [:span {:class (stl/css :icon-dropdown)} deprecated-icon/arrow]
+     [:& dropdown {:show @show-dropdown?
+                   :on-close hide-dropdown}
+      [:div {:class (stl/css :dropdown :preview-size-dropdown)
+             :on-click dom/stop-propagation}
+       [:div {:class (stl/css :preview-size-title)}
+        (tr "viewer.header.preview-size")]
+       [:label {:class (stl/css :preview-size-field)}
+        [:span {:class (stl/css :label)} (tr "viewer.header.preview-width")]
+        [:input {:type "number"
+                 :min 1
+                 :value @width*
+                 :on-change change-width}]]
+       [:label {:class (stl/css :preview-size-field)}
+        [:span {:class (stl/css :label)} (tr "viewer.header.preview-height")]
+        [:input {:type "number"
+                 :min 1
+                 :value @height*
+                 :on-change change-height}]]
+       [:div {:class (stl/css :preview-size-actions)}
+        [:button {:type "button"
+                  :on-click clear-size}
+         (tr "viewer.header.preview-size-clear")]
+        [:button {:type "button"
+                  :on-click apply-size}
+         (tr "viewer.header.preview-size-apply")]]]]]))
+
 (defn animate-go-to-frame
   [animation current-viewport orig-viewport current-size orig-size wrapper-size]
   (case (:animation-type animation)

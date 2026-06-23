@@ -9,6 +9,7 @@
   (:require
    [app.common.data :as d]
    [app.common.files.helpers :as cfh]
+   [app.common.schema :as sm]
    [app.common.types.page :as ctp]
    [app.common.types.shape-tree :as ctt]
    [app.common.types.shape.interactions :as ctsi]
@@ -183,6 +184,7 @@
         close-click-outside? (:close-click-outside interaction false)
         background-overlay?  (:background-overlay interaction false)
         preserve-scroll?     (:preserve-scroll interaction false)
+        conditional-destinations (:conditional-destinations interaction)
 
         way                  (-> interaction :animation :way)
         direction            (-> interaction :animation :direction)
@@ -224,6 +226,32 @@
            (let [value event
                  value (when (not= value "") (uuid/parse value))]
              (update-interaction index #(ctsi/set-destination % value)))))
+
+        add-conditional-destination
+        (mf/use-fn
+         (mf/deps index update-interaction)
+         (fn []
+           (update-interaction index ctsi/add-conditional-destination)))
+
+        remove-conditional-destination
+        (mf/use-fn
+         (mf/deps index update-interaction)
+         (fn [condition-index]
+           (update-interaction index #(ctsi/remove-conditional-destination % condition-index))))
+
+        change-conditional-min-width
+        (mf/use-fn
+         (mf/deps index update-interaction)
+         (fn [condition-index value]
+           (when (sm/valid-safe-number? value)
+             (update-interaction index #(ctsi/set-conditional-min-width % condition-index value)))))
+
+        change-conditional-destination
+        (mf/use-fn
+         (mf/deps index update-interaction)
+         (fn [condition-index value]
+           (let [value (when (not= value "") (uuid/parse value))]
+             (update-interaction index #(ctsi/set-conditional-destination % condition-index value)))))
 
         change-position-relative-to
         (mf/use-fn
@@ -453,6 +481,42 @@
                         :on-change change-destination
                         :searchable? true
                         :search-placeholder (tr "workspace.options.interaction-destination")}]]])
+
+        ;; Conditional destinations
+        (when (ctsi/has-conditional-destinations interaction)
+          [:*
+           (for [[condition-index condition] (d/enumerate conditional-destinations)]
+             [:div {:class (stl/css :interaction-row :conditional-destination-row)
+                    :key (str "conditional-destination-" index "-" condition-index)}
+              [:div {:class (stl/css :interaction-row-label)}
+               [:div {:class (stl/css :interaction-row-name)}
+                (tr "workspace.options.interaction-min-width")]]
+              [:div {:class (stl/css :conditional-destination-input)}
+               [:> numeric-input* {:property (tr "workspace.options.width")
+                                   :on-change #(change-conditional-min-width condition-index %)
+                                   :value (:min-width condition)}]]
+              [:div {:class (stl/css :conditional-destination-select)}
+               [:& select {:default-value (str (:destination condition))
+                           :options destination-options
+                           :on-change #(change-conditional-destination condition-index %)
+                           :searchable? true
+                           :search-placeholder (tr "workspace.options.interaction-destination")}]]
+              [:div {:class (stl/css :conditional-destination-remove)}
+               [:> icon-button* {:variant "secondary"
+                                 :icon i/remove
+                                 :aria-label (tr "labels.remove")
+                                 :on-click #(remove-conditional-destination condition-index)}]]])
+
+           [:div {:class (stl/css :interaction-row)}
+            [:div {:class (stl/css :interaction-row-label)}
+             [:div {:class (stl/css :interaction-row-name)}
+              (tr "workspace.options.interaction-width-conditions")]]
+            [:div {:class (stl/css :conditional-destination-add)}
+             [:> icon-button* {:variant "secondary"
+                               :icon i/add
+                               :aria-label (tr "workspace.options.interaction-add-width-condition")
+                               :on-click add-conditional-destination}]
+             [:span (tr "workspace.options.interaction-add-width-condition")]]]])
 
         ;; Preserve scroll
         (when (ctsi/has-preserve-scroll interaction)

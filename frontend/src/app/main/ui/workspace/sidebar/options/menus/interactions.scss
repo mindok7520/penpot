@@ -186,6 +186,31 @@
   grid-column: span 5;
 }
 
+.conditional-destination-input {
+  grid-column: span 2;
+}
+
+.conditional-destination-select {
+  grid-column: span 2;
+}
+
+.conditional-destination-remove {
+  grid-column: span 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.conditional-destination-add {
+  @include t.use-typography("body-small");
+
+  grid-column: span 5;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  color: var(--color-foreground-secondary);
+}
+
 .interaction-row-radio {
   grid-column: 4 / span 5;
 }

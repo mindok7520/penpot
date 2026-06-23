@@ -472,6 +472,19 @@
             :easing (format-key (:easing animation))}
        nil))))
 
+(defn format-width-branch
+  [plugin file-id page-id {:keys [min-width destination]}]
+  (when (and (some? min-width) (some? destination))
+    #js {:minWidth min-width
+         :destination (shape-proxy plugin file-id page-id destination)}))
+
+(defn format-width-branches
+  [plugin file-id page-id branches]
+  (let [branches (format-array (partial format-width-branch plugin file-id page-id)
+                               branches)]
+    (when (pos? (alength branches))
+      branches)))
+
 ;;export type Action =
 ;;  | NavigateTo
 ;;  | OpenOverlay
@@ -535,6 +548,7 @@
        :navigate
        #js {:type "navigate-to"
             :destination (when (:destination interaction) (shape-proxy plugin file-id page-id (:destination interaction)))
+            :widthBranches (format-width-branches plugin file-id page-id (:conditional-destinations interaction))
             :preserveScrollPosition (:preserve-scroll interaction false)
             :animation (format-animation (:animation interaction))}
 

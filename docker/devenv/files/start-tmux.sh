@@ -8,6 +8,7 @@ source ~/.bashrc
 
 PENPOT_TMUX_SESSION="penpot"
 PENPOT_TMUX_ATTACH="${PENPOT_TMUX_ATTACH:-true}"
+PENPOT_START_STORYBOOK="${PENPOT_START_STORYBOOK:-false}"
 
 function attach_or_exit() {
     if [ "$PENPOT_TMUX_ATTACH" = "true" ]; then
@@ -29,36 +30,48 @@ tmux -2 new-session -d -s "$PENPOT_TMUX_SESSION"
 
 echo "[start-tmux.sh] Installing node dependencies"
 pushd ~/penpot/frontend/
-./scripts/setup;
+PENPOT_SKIP_PLAYWRIGHT_INSTALL=true ./scripts/setup;
 popd
 pushd ~/penpot/exporter/
-./scripts/setup;
+PENPOT_SKIP_PLAYWRIGHT_INSTALL=true ./scripts/setup;
 popd
 
 tmux rename-window -t "$PENPOT_TMUX_SESSION:0" 'frontend watch'
 tmux select-window -t "$PENPOT_TMUX_SESSION:0"
-tmux send-keys -t "$PENPOT_TMUX_SESSION" 'cd penpot/frontend' enter C-l
-tmux send-keys -t "$PENPOT_TMUX_SESSION" './scripts/watch app' enter
+frontend_pane="$PENPOT_TMUX_SESSION:0.0"
+tmux send-keys -t "$frontend_pane" 'cd penpot/frontend' enter C-l
+tmux send-keys -t "$frontend_pane" './scripts/watch app' enter
 
-tmux new-window -t "$PENPOT_TMUX_SESSION:1" -n 'frontend storybook'
-tmux select-window -t "$PENPOT_TMUX_SESSION:1"
-tmux send-keys -t "$PENPOT_TMUX_SESSION" 'cd penpot/frontend' enter C-l
-tmux send-keys -t "$PENPOT_TMUX_SESSION" './scripts/watch storybook' enter
+exporter_window=1
+backend_window=2
 
-tmux new-window -t "$PENPOT_TMUX_SESSION:2" -n 'exporter'
-tmux select-window -t "$PENPOT_TMUX_SESSION:2"
-tmux send-keys -t "$PENPOT_TMUX_SESSION" 'cd penpot/exporter' enter C-l
-tmux send-keys -t "$PENPOT_TMUX_SESSION" 'rm -f target/app.js*' enter C-l
-tmux send-keys -t "$PENPOT_TMUX_SESSION" './scripts/watch' enter
+if [ "$PENPOT_START_STORYBOOK" = "true" ]; then
+    tmux new-window -t "$PENPOT_TMUX_SESSION:1" -n 'frontend storybook'
+    tmux select-window -t "$PENPOT_TMUX_SESSION:1"
+    storybook_pane="$PENPOT_TMUX_SESSION:1.0"
+    tmux send-keys -t "$storybook_pane" 'cd penpot/frontend' enter C-l
+    tmux send-keys -t "$storybook_pane" './scripts/watch storybook' enter
+    exporter_window=2
+    backend_window=3
+fi
 
-tmux split-window -v -t "$PENPOT_TMUX_SESSION"
-tmux send-keys -t "$PENPOT_TMUX_SESSION" 'cd penpot/exporter' enter C-l
-tmux send-keys -t "$PENPOT_TMUX_SESSION" './scripts/wait-and-start.sh' enter
+tmux new-window -t "$PENPOT_TMUX_SESSION:$exporter_window" -n 'exporter'
+tmux select-window -t "$PENPOT_TMUX_SESSION:$exporter_window"
+exporter_watch_pane="$PENPOT_TMUX_SESSION:$exporter_window.0"
+tmux send-keys -t "$exporter_watch_pane" 'cd penpot/exporter' enter C-l
+tmux send-keys -t "$exporter_watch_pane" 'rm -f target/app.js*' enter C-l
+tmux send-keys -t "$exporter_watch_pane" './scripts/watch' enter
 
-tmux new-window -t "$PENPOT_TMUX_SESSION:3" -n 'backend'
-tmux select-window -t "$PENPOT_TMUX_SESSION:3"
-tmux send-keys -t "$PENPOT_TMUX_SESSION" 'cd penpot/backend' enter C-l
-tmux send-keys -t "$PENPOT_TMUX_SESSION" './scripts/start-dev' enter
+tmux split-window -v -t "$exporter_watch_pane"
+exporter_server_pane="$PENPOT_TMUX_SESSION:$exporter_window.1"
+tmux send-keys -t "$exporter_server_pane" 'cd penpot/exporter' enter C-l
+tmux send-keys -t "$exporter_server_pane" './scripts/wait-and-start.sh' enter
+
+tmux new-window -t "$PENPOT_TMUX_SESSION:$backend_window" -n 'backend'
+tmux select-window -t "$PENPOT_TMUX_SESSION:$backend_window"
+backend_pane="$PENPOT_TMUX_SESSION:$backend_window.0"
+tmux send-keys -t "$backend_pane" 'cd penpot/backend' enter C-l
+tmux send-keys -t "$backend_pane" './scripts/start-dev' enter
 
 if echo "$PENPOT_FLAGS" | grep -q "enable-mcp"; then
     pushd ~/penpot/mcp/
@@ -68,8 +81,9 @@ if echo "$PENPOT_FLAGS" | grep -q "enable-mcp"; then
 
     tmux new-window -t "$PENPOT_TMUX_SESSION:4" -n 'mcp'
     tmux select-window -t "$PENPOT_TMUX_SESSION:4"
-    tmux send-keys -t "$PENPOT_TMUX_SESSION" 'cd penpot/mcp' enter C-l
-    tmux send-keys -t "$PENPOT_TMUX_SESSION" './scripts/start-mcp-devenv' enter
+    mcp_pane="$PENPOT_TMUX_SESSION:4.0"
+    tmux send-keys -t "$mcp_pane" 'cd penpot/mcp' enter C-l
+    tmux send-keys -t "$mcp_pane" './scripts/start-mcp-devenv' enter
 fi
 
 if [ "${SERENA_ENABLED:-false}" = "true" ]; then
@@ -79,7 +93,8 @@ if [ "${SERENA_ENABLED:-false}" = "true" ]; then
     fi
     tmux new-window -t "$PENPOT_TMUX_SESSION:5" -n 'serena'
     tmux select-window -t "$PENPOT_TMUX_SESSION:5"
-    tmux send-keys -t "$PENPOT_TMUX_SESSION" "serena start-mcp-server --transport streamable-http --port 14281 --project penpot --context ${SERENA_CONTEXT} --host 0.0.0.0" enter
+    serena_pane="$PENPOT_TMUX_SESSION:5.0"
+    tmux send-keys -t "$serena_pane" "serena start-mcp-server --transport streamable-http --port 14281 --project penpot --context ${SERENA_CONTEXT} --host 0.0.0.0" enter
 fi
 
 attach_or_exit

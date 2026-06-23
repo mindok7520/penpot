@@ -71,6 +71,16 @@
   overflow: auto;
 }
 
+.viewer-section.preview-sized {
+  justify-self: center;
+  align-self: center;
+  max-width: calc(100vw - deprecated.$s-48);
+  max-height: calc(100vh - deprecated.$s-96);
+  border-radius: deprecated.$br-8;
+  box-shadow: 0 0 0 deprecated.$s-2 var(--viewer-controls-background-color);
+  background-color: var(--viewer-background-color);
+}
+
 .inspect-layout .viewer-section {
   flex-wrap: nowrap;
   margin-top: 0;

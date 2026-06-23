@@ -278,7 +278,7 @@
                           :zoom zoom}])]])
 
 (mf/defc viewer-content*
-  [{:keys [data page-id share-id section index interactions-mode share]}]
+  [{:keys [data page-id share-id section index interactions-mode preview-size share]}]
   (let [{:keys [file users project permissions]} data
         allowed (or
                  (= section :interactions)
@@ -294,6 +294,7 @@
         local (mf/deref refs/viewer-local)
 
         nav-scroll (:nav-scroll local)
+        preview-size (or preview-size (:preview-size local))
         orig-viewport-ref    (mf/use-ref nil)
         current-viewport-ref (mf/use-ref nil)
         viewer-section-ref   (mf/use-ref nil)
@@ -437,6 +438,13 @@
             (.removeEventListener globals/document event on-exit-fullscreen)))))
 
     (mf/use-effect
+     (mf/deps preview-size)
+     (fn []
+       (st/emit! (dv/apply-preview-size preview-size))
+       nil))
+
+    (mf/use-effect
+     (mf/deps preview-size)
      (fn []
        (set-up-new-size)
        (.addEventListener js/window "resize" set-up-new-size)
@@ -564,7 +572,11 @@
       [:section#viewer-section {:ref viewer-section-ref
                                 :data-viewer-section true
                                 :class (stl/css-case :viewer-section true
-                                                     :fullscreen fullscreen?)
+                                                     :fullscreen fullscreen?
+                                                     :preview-sized (some? preview-size))
+                                :style (when preview-size
+                                         {:width (:width preview-size)
+                                          :height (:height preview-size)})
                                 :on-click click-on-screen}
        (cond
          (empty? frames)
@@ -618,6 +630,7 @@
                         :section section
                         :shown-thumbnails (:show-thumbnails local)
                         :interactions-mode interactions-mode
+                        :preview-size preview-size
                         :share share}]]))
 
 ;; --- Component: Viewer

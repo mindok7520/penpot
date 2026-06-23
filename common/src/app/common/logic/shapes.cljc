@@ -190,8 +190,7 @@
                    ;; If any of the deleted shapes is the destination of
                    ;; some interaction, this must be deleted, too.
                    (let [interactions (:interactions shape)]
-                     (some #(and (ctsi/has-destination %)
-                                 (contains? ids-to-delete (:destination %)))
+                     (some #(some (partial ctsi/dest-to? %) ids-to-delete)
                            interactions)))
                  (vals objects))
 
@@ -298,8 +297,7 @@
                                           (d/update-when shape :interactions
                                                          (fn [interactions]
                                                            (into []
-                                                                 (remove #(and (ctsi/has-destination %)
-                                                                               (contains? ids-to-delete (:destination %))))
+                                                                 (remove #(some (partial ctsi/dest-to? %) ids-to-delete))
                                                                  interactions))))))]
      [all-parents changes])))
 

@@ -4915,6 +4915,30 @@ msgstr "인터랙션"
 msgid "viewer.header.interactions-section"
 msgstr "인터랙션 (%s)"
 
+#: src/app/main/ui/viewer/interactions.cljs:364
+msgid "viewer.header.preview-height"
+msgstr "높이"
+
+#: src/app/main/ui/viewer/interactions.cljs:356
+msgid "viewer.header.preview-size"
+msgstr "미리보기 크기"
+
+#: src/app/main/ui/viewer/interactions.cljs:375
+msgid "viewer.header.preview-size-apply"
+msgstr "적용"
+
+#: src/app/main/ui/viewer/interactions.cljs:349
+msgid "viewer.header.preview-size-auto"
+msgstr "자동 크기"
+
+#: src/app/main/ui/viewer/interactions.cljs:372
+msgid "viewer.header.preview-size-clear"
+msgstr "해제"
+
+#: src/app/main/ui/viewer/interactions.cljs:358
+msgid "viewer.header.preview-width"
+msgstr "너비"
+
 #: src/app/main/ui/viewer/share_link.cljs:188
 msgid "viewer.header.share.copy-link"
 msgstr "링크 복사"
@@ -6070,6 +6094,10 @@ msgstr "검사"
 msgid "workspace.options.interaction-action"
 msgstr "동작"
 
+#: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:515, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:517
+msgid "workspace.options.interaction-add-width-condition"
+msgstr "너비 조건 추가"
+
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:43, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:344
 msgid "workspace.options.interaction-after-delay"
 msgstr "지연 후"
@@ -6162,6 +6190,10 @@ msgstr "마우스 진입 시"
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:42, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:342
 msgid "workspace.options.interaction-mouse-leave"
 msgstr "마우스 이탈 시"
+
+#: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:491
+msgid "workspace.options.interaction-min-width"
+msgstr "최소 너비"
 
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:430, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:632
 msgid "workspace.options.interaction-ms"
@@ -6279,6 +6311,10 @@ msgstr "호버 시"
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:40, src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:340
 msgid "workspace.options.interaction-while-pressing"
 msgstr "누르는 동안"
+
+#: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:511
+msgid "workspace.options.interaction-width-conditions"
+msgstr "너비 조건"
 
 #: src/app/main/ui/workspace/sidebar/options/menus/interactions.cljs:743
 msgid "workspace.options.interactions"

@@ -416,6 +416,21 @@
 
          nil)))))
 
+(defn parse-width-branch
+  [branch]
+  (when branch
+    (let [min-width (obj/get branch "minWidth")]
+      (when (some? min-width)
+        (d/without-nils
+         {:min-width min-width
+          :destination (-> (obj/get branch "destination") (obj/get "$id"))})))))
+
+(defn parse-width-branches
+  [branches]
+  (when (array? branches)
+    (not-empty
+     (into [] (keep parse-width-branch) (array-seq branches)))))
+
 ;;export type Action =
 ;;  | NavigateTo
 ;;  | OpenOverlay
@@ -480,6 +495,7 @@
          :navigate-to
          {:action-type :navigate
           :destination (-> (obj/get action "destination") (obj/get "$id"))
+          :conditional-destinations (parse-width-branches (obj/get action "widthBranches"))
           :preserve-scroll (obj/get action "preserveScrollPosition")
           :animation (-> (obj/get action "animation") parse-animation)}
 
