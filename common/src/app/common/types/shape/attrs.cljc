@@ -57,6 +57,7 @@
             :stroke-cap-end
 
             :exports
+            :frontend-handoff
 
             :layout
             :layout-flex-dir
@@ -112,6 +113,7 @@
             :background-blur
 
             :exports
+            :frontend-handoff
 
             :layout-item-margin
             :layout-item-margin-type
@@ -171,6 +173,7 @@
            :background-blur
 
            :exports
+           :frontend-handoff
 
            :layout-item-margin
            :layout-item-margin-type
@@ -229,6 +232,7 @@
              :background-blur
 
              :exports
+             :frontend-handoff
 
              :layout-item-margin
              :layout-item-margin-type
@@ -287,6 +291,7 @@
            :background-blur
 
            :exports
+           :frontend-handoff
 
            :layout-item-margin
            :layout-item-margin-type
@@ -369,6 +374,7 @@
            :grow-type
 
            :exports
+           :frontend-handoff
 
            :layout-item-margin
            :layout-item-margin-type
@@ -407,6 +413,7 @@
             :background-blur
 
             :exports
+            :frontend-handoff
 
             :layout-item-margin
             :layout-item-margin-type
@@ -466,6 +473,7 @@
               :background-blur
 
               :exports
+              :frontend-handoff
 
               :layout-item-margin
               :layout-item-margin-type
@@ -524,6 +532,7 @@
            :background-blur
 
            :exports
+           :frontend-handoff
 
            :layout-item-margin
            :layout-item-margin-type
@@ -536,5 +545,3 @@
            :layout-item-align-self
            :layout-item-absolute
            :layout-item-z-index}})
-
-

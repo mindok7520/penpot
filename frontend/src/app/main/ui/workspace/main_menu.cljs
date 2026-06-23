@@ -10,6 +10,8 @@
    [app.common.data :as d]
    [app.common.data.macros :as dm]
    [app.common.files.helpers :as cfh]
+   [app.common.json :as json]
+   [app.common.logic.handoff :as handoff]
    [app.common.uuid :as uuid]
    [app.config :as cf]
    [app.main.data.common :as dcm]
@@ -44,7 +46,9 @@
    [app.util.dom :as dom]
    [app.util.i18n :as i18n :refer [tr]]
    [app.util.keyboard :as kbd]
+   [app.util.webapi :as wapi]
    [beicon.v2.core :as rx]
+   [cuerdas.core :as str]
    [potok.v2.core :as ptk]
    [rumext.v2 :as mf]))
 
@@ -56,6 +60,14 @@
      [:span {:class (stl/css :shortcut-key)
              :key sc}
       sc])])
+
+(defn- handoff-filename
+  [file]
+  (let [filename (-> (or (:name file) "penpot-file")
+                     (str/replace #"[^A-Za-z0-9._-]+" "-")
+                     (str/replace #"(^-+|-+$)" ""))]
+    (dm/str (if (str/blank? filename) "penpot-file" filename)
+            "-ai-handoff")))
 
 (mf/defc help-info-menu*
   {::mf/private true
@@ -661,6 +673,23 @@
            (when (kbd/enter? event)
              (on-export-file event))))
 
+        on-export-ai-handoff
+        (mf/use-fn
+         (mf/deps file)
+         (fn [_]
+           (let [payload (-> file
+                             (handoff/export-file)
+                             (json/encode :indent 2))
+                 blob    (wapi/create-blob payload "application/json")]
+             (dom/trigger-download (handoff-filename file) blob))))
+
+        on-export-ai-handoff-key-down
+        (mf/use-fn
+         (mf/deps on-export-ai-handoff)
+         (fn [event]
+           (when (kbd/enter? event)
+             (on-export-ai-handoff event))))
+
         on-export-frames
         (mf/use-fn
          (mf/deps frames)
@@ -731,6 +760,13 @@
                               :id          "file-menu-binary-file"}
       [:span {:class (stl/css :item-name)}
        (tr "dashboard.download-binary-file")]]
+
+     [:> dropdown-menu-item* {:class (stl/css :base-menu-item :submenu-item)
+                              :on-click    on-export-ai-handoff
+                              :on-key-down on-export-ai-handoff-key-down
+                              :id          "file-menu-ai-handoff-json"}
+      [:span {:class (stl/css :item-name)}
+       "Export AI handoff JSON"]]
 
      (when (seq frames)
        [:> dropdown-menu-item* {:class (stl/css :base-menu-item :submenu-item)

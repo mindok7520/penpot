@@ -99,6 +99,7 @@
    :bool-type               :content-group
    :bool-content            :content-group
    :exports                 :exports-group
+   :frontend-handoff        :frontend-handoff-group
    :grids                   :grids-group
 
    :show-content            :show-content

@@ -13,6 +13,7 @@
    [app.main.ui.workspace.sidebar.options.menus.constraints :refer [constraint-attrs constraints-menu*]]
    [app.main.ui.workspace.sidebar.options.menus.exports :refer [exports-menu* exports-attrs]]
    [app.main.ui.workspace.sidebar.options.menus.fill :as fill]
+   [app.main.ui.workspace.sidebar.options.menus.frontend-handoff :refer [frontend-handoff-menu* frontend-handoff-attrs]]
    [app.main.ui.workspace.sidebar.options.menus.grid-cell :as grid-cell]
    [app.main.ui.workspace.sidebar.options.menus.layer :refer [layer-attrs layer-menu*]]
    [app.main.ui.workspace.sidebar.options.menus.layout-container :refer [layout-container-flex-attrs layout-container-menu*]]
@@ -136,10 +137,11 @@
                      :values (select-keys shape [:blur :background-blur])}]
      [:> svg-attrs-menu* {:ids ids
                           :values (select-keys shape [:svg-attrs])}]
+     [:> frontend-handoff-menu* {:ids ids
+                                 :values (select-keys shape frontend-handoff-attrs)}]
      [:> exports-menu* {:type type
                         :ids ids
                         :shapes shapes
                         :values (select-keys shape exports-attrs)
                         :page-id page-id
                         :file-id file-id}]]))
-

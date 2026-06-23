@@ -26,6 +26,7 @@
    [app.main.ui.workspace.sidebar.options.menus.constraints :refer [constraint-attrs constraints-menu*]]
    [app.main.ui.workspace.sidebar.options.menus.exports :refer [exports-attrs exports-menu*]]
    [app.main.ui.workspace.sidebar.options.menus.fill :as fill]
+   [app.main.ui.workspace.sidebar.options.menus.frontend-handoff :refer [frontend-handoff-menu* frontend-handoff-attrs]]
    [app.main.ui.workspace.sidebar.options.menus.layer :refer [layer-attrs layer-menu*]]
    [app.main.ui.workspace.sidebar.options.menus.layout-container :refer [layout-container-flex-attrs layout-container-menu*]]
    [app.main.ui.workspace.sidebar.options.menus.layout-item :refer [layout-item-attrs layout-item-menu*]]
@@ -52,6 +53,7 @@
     :stroke           :shape
     :text             :children
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :shape
     :layout-item      :shape}
 
@@ -66,6 +68,7 @@
     :stroke           :children
     :text             :children
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :ignore
     :layout-item      :shape}
 
@@ -80,6 +83,7 @@
     :stroke           :shape
     :text             :ignore
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :ignore
     :layout-item      :shape}
 
@@ -94,6 +98,7 @@
     :stroke           :shape
     :text             :text
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :ignore
     :layout-item      :shape}
 
@@ -108,6 +113,7 @@
     :stroke           :ignore
     :text             :ignore
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :ignore
     :layout-item      :shape}
 
@@ -122,6 +128,7 @@
     :stroke           :shape
     :text             :ignore
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :ignore
     :layout-item      :shape}
 
@@ -136,6 +143,7 @@
     :stroke           :shape
     :text             :ignore
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :ignore
     :layout-item      :shape}
 
@@ -150,6 +158,7 @@
     :stroke           :shape
     :text             :ignore
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :ignore
     :layout-item      :shape}
 
@@ -164,6 +173,7 @@
     :stroke           :shape
     :text             :ignore
     :exports          :shape
+    :frontend-handoff :shape
     :layout-container :ignore
     :layout-item      :shape}})
 
@@ -177,6 +187,7 @@
    :stroke            stroke-attrs
    :text              txt/text-all-attrs
    :exports           exports-attrs
+   :frontend-handoff  frontend-handoff-attrs
    :layout-container  layout-container-flex-attrs
    :layout-item       layout-item-attrs})
 
@@ -421,6 +432,9 @@
         [exports-ids exports-values]
         (get-attrs shapes objects :exports)
 
+        [frontend-handoff-ids frontend-handoff-values]
+        (get-attrs shapes objects :frontend-handoff)
+
         [layout-container-ids layout-container-values layout-container-tokens]
         (get-attrs shapes objects :layout-container)
 
@@ -530,6 +544,10 @@
 
      (when-not (empty? blur-ids)
        [:> blur-menu* {:type type :ids blur-ids :values blur-values}])
+
+     (when-not (empty? frontend-handoff-ids)
+       [:> frontend-handoff-menu* {:ids frontend-handoff-ids
+                                   :values frontend-handoff-values}])
 
      (when-not (empty? exports-ids)
        [:> exports-menu* {:type type

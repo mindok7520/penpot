@@ -27,6 +27,7 @@
    [app.common.types.shape.background-blur :as ctsbb]
    [app.common.types.shape.blur :as ctsb]
    [app.common.types.shape.export :as ctse]
+   [app.common.types.shape.handoff :as ctsh]
    [app.common.types.shape.interactions :as ctsi]
    [app.common.types.shape.layout :as ctsl]
    [app.common.types.shape.shadow :as ctss]
@@ -220,6 +221,7 @@
     [::sm/one-of blend-modes]]
    [:interactions {:optional true}
     [:vector {:gen/max 2} ctsi/schema:interaction]]
+   [:frontend-handoff {:optional true} ctsh/schema:frontend-handoff]
    [:shadow {:optional true}
     [:vector {:gen/max 1} ctss/schema:shadow]]
    [:blur {:optional true} ctsb/schema:blur]
@@ -417,7 +419,7 @@
     :remote-synced :shape-ref :touched :blocked :collapsed :locked
     :hidden :masked-group :fills :proportion :proportion-lock :constraints-h
     :constraints-v :fixed-scroll :r1 :r2 :r3 :r4 :rotation :opacity :grids :exports
-    :strokes :blend-mode :interactions :shadow :blur :background-blur :grow-type :applied-tokens
+    :strokes :blend-mode :interactions :frontend-handoff :shadow :blur :background-blur :grow-type :applied-tokens
     :plugin-data})
 
 (def ^:private allowed-shape-geom-attrs #{:x :y :width :height})
